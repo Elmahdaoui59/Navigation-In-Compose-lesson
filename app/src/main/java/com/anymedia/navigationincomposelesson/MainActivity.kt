@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,10 +15,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.anymedia.navigationincomposelesson.ui.theme.NavigationInComposeLessonTheme
-import com.anymedia.navigationincomposelesson.ui.theme.Typography
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -31,7 +33,8 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    FirstScreen()
+                    val navController = rememberNavController()
+                    SetupNavHost(navController = navController)
                 }
             }
         }
@@ -39,34 +42,65 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun FirstScreen() {
+fun SetupNavHost(
+    navController: NavHostController
+) {
+
+    NavHost(
+        navController = navController,
+        startDestination = Screen.MainScreen.route
+    ) {
+        composable(Screen.MainScreen.route) {
+            MainScreen() {
+                navController.navigate(Screen.AccountsScreen.route)
+            }
+        }
+        composable(Screen.AccountsScreen.route) {
+            AccountsScreen() {
+                navController.popBackStack()
+            }
+        }
+    }
+}
+
+sealed class Screen(val route: String) {
+    object MainScreen : Screen("main_screen")
+    object AccountsScreen : Screen("accounts_screen")
+}
+
+@Composable
+fun MainScreen(
+    onNavigate: () -> Unit
+) {
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = "First Screen")
+        Text(text = "Main Screen")
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        Button(onClick = { /*TODO*/ }) {
-            Text(text = "Go to second screen")
+        Button(onClick = { onNavigate() }) {
+            Text(text = "Go to accounts screen")
         }
     }
 }
 
 @Composable
-fun SecondScreen() {
+fun AccountsScreen(
+    onGoBack: () -> Unit
+) {
     Column(
         modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text(text = "Second Screen")
+        Text(text = "Accounts Screen")
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        Button(onClick = { /*TODO*/ }) {
+        Button(onClick = { onGoBack() }) {
             Text(text = "Go Back")
         }
     }
