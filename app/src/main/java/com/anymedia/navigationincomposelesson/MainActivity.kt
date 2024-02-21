@@ -16,11 +16,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.anymedia.navigationincomposelesson.ui.theme.NavigationInComposeLessonTheme
 
 class MainActivity : ComponentActivity() {
@@ -52,7 +55,7 @@ fun SetupNavHost(
     ) {
         composable(Screen.MainScreen.route) {
             MainScreen() {
-                navController.navigate(Screen.AccountsScreen.route)
+                navController.navigate("${Screen.DetailScreen.route}/1234") /* 1234 will be passed as a nav arg to detail screen */
             }
         }
         composable(Screen.AccountsScreen.route) {
@@ -60,13 +63,29 @@ fun SetupNavHost(
                 navController.popBackStack()
             }
         }
+        composable(
+            "${Screen.DetailScreen.route}/{emailId}",
+            arguments = listOf(navArgument("emailId") { type = NavType.IntType })
+        ) { backStackEntry: NavBackStackEntry ->
+            val emailId = backStackEntry.arguments?.getInt("emailId")
+            DetailScreen(emailId = emailId!!)
+        }
     }
 }
 
-sealed class Screen(val route: String) {
-    object MainScreen : Screen("main_screen")
-    object AccountsScreen : Screen("accounts_screen")
+@Composable
+fun DetailScreen(
+    emailId: Int
+) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(text = emailId.toString())
+    }
 }
+
 
 @Composable
 fun MainScreen(
@@ -82,7 +101,7 @@ fun MainScreen(
         Spacer(modifier = Modifier.height(20.dp))
 
         Button(onClick = { onNavigate() }) {
-            Text(text = "Go to accounts screen")
+            Text(text = "Go to detail screen")
         }
     }
 }
@@ -104,4 +123,10 @@ fun AccountsScreen(
             Text(text = "Go Back")
         }
     }
+}
+
+sealed class Screen(val route: String) {
+    object MainScreen : Screen("main_screen")
+    object AccountsScreen : Screen("accounts_screen")
+    object DetailScreen : Screen("detail_screen")
 }
